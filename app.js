@@ -10,7 +10,7 @@ let jobs = [
     name: '오피지지(OP.GG)',
     platform: 'wanted',
     id: '1',
-    main_work: ['OGT 웹사이트 최적화', 'OGT 글로벌 플랫폼 개발 및 운영'],
+    mainWork: ['OGT 웹사이트 최적화', 'OGT 글로벌 플랫폼 개발 및 운영'],
     qualification: [
       'Javascript의 대한 높은 이해도를 보유하신 분',
       'Next.js, React.js을 활용한 개발 경험이 있으신 분',
@@ -35,7 +35,7 @@ let jobs = [
     name: '오피지지(OP.GG)',
     platform: 'Wanted',
     id: '2',
-    main_work: ['OGT 웹사이트 최적화', 'OGT 글로벌 플랫폼 개발 및 운영'],
+    mainWork: ['OGT 웹사이트 최적화', 'OGT 글로벌 플랫폼 개발 및 운영'],
     qualification: [
       'Javascript의 대한 높은 이해도를 보유하신 분',
       'Next.js, React.js을 활용한 개발 경험이 있으신 분',
@@ -71,7 +71,7 @@ app.get('/jobs', (req, res, next) => {
 });
 
 app.post('/jobs', (req, res, next) => {
-  const { url, platform } = req.body;
+  const url = req.body.url;
   const job = jobs[0]; //cheerio로 크롤링해야해, 에러 조건도 달아줘야해
   jobs = [job, ...jobs];
   console.log(jobs);
