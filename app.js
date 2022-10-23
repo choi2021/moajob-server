@@ -3,8 +3,10 @@ import helmet from 'helmet';
 import cors from 'cors';
 import 'express-async-errors';
 import morgan from 'morgan';
+import Crawler from './service/crawler.js';
 
 const app = express();
+const crawler = new Crawler();
 let jobs = [
   {
     name: '오피지지(OP.GG)',
@@ -70,11 +72,10 @@ app.get('/jobs', (req, res, next) => {
   res.status(200).json(data);
 });
 
-app.post('/jobs', (req, res, next) => {
+app.post('/jobs', async (req, res, next) => {
   const url = req.body.url;
-  const job = jobs[0]; //cheerio로 크롤링해야해, 에러 조건도 달아줘야해
+  const job = await crawler.creatJob(url);
   jobs = [job, ...jobs];
-  console.log(jobs);
   res.status(201).json(job);
 });
 

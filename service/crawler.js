@@ -9,7 +9,7 @@ export default class Crawler {
   async creatJob(url) {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
-    await page.goto('url');
+    await page.goto(url);
 
     const content = await page.content();
     const $ = cheerio.load(content);
