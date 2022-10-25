@@ -74,9 +74,14 @@ app.get('/jobs', (req, res, next) => {
 
 app.post('/jobs', async (req, res, next) => {
   const url = req.body.url;
-  const job = await crawler.creatJob(url);
-  jobs = [job, ...jobs];
-  res.status(201).json(job);
+  let job;
+  try {
+    job = await crawler.creatJob(url);
+    jobs = [job, ...jobs];
+    res.status(201).json(job);
+  } catch (error) {
+    res.sendStatus(400);
+  }
 });
 
 app.delete('/jobs/:id', (req, res, next) => {

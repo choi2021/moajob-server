@@ -6,13 +6,21 @@ export default class Crawler {
     this.wantedURL = 'https://www.wanted.co.kr';
   }
 
+  checkUrl(url) {
+    return url.startsWith(this.wantedURL);
+  }
+
   async creatJob(url) {
+    if (!this.checkUrl(url)) {
+      throw new Error('잘못된 URL입니다.');
+    }
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
     await page.goto(url);
 
     const content = await page.content();
     const $ = cheerio.load(content);
+    const imgLists = $('img');
     const titleLists = $('h6');
     const contentLists = $('p>span');
     const result = {
@@ -23,7 +31,14 @@ export default class Crawler {
       qualification: [],
       preferential: [],
       url,
+      img: '',
     };
+
+    imgLists.each((idx, node) => {
+      if (idx == 1) {
+        result.img = $(node).attr('src');
+      }
+    });
 
     contentLists.each((idx, node) => {
       switch (idx) {
@@ -53,6 +68,7 @@ export default class Crawler {
         }
       }
     });
+    await browser.close();
     return result;
   }
 }
