@@ -1,9 +1,15 @@
 import cheerio from 'cheerio';
 import puppeteer from 'puppeteer';
 
+const MAINWORK = '주요업무';
+const QUALIFICATION = '자격요건';
+const PREFERENTIAL = '우대사항';
+
+const DotRegex = /(?<=• )(.*?)(?=<br>)/gm;
+
 export default class Crawler {
   constructor() {
-    this.wantedURL = 'https://www.wanted.co.kr';
+    this.wantedURL = 'https://www.wanted.co.kr/wd';
   }
 
   checkUrl(url) {
@@ -21,10 +27,9 @@ export default class Crawler {
     const content = await page.content();
     const $ = cheerio.load(content);
     const imgLists = $('img');
-    const titleLists = $('h6');
-    const contentLists = $('p>span');
+    const name = $('h6');
     const result = {
-      name: $(titleLists[0]).text(),
+      name: $(name[0]).text(),
       platform: 'wanted',
       id: Date.now(),
       mainWork: [],
@@ -40,34 +45,45 @@ export default class Crawler {
       }
     });
 
-    contentLists.each((idx, node) => {
-      switch (idx) {
-        case 1: {
-          const mainWork = $(node)
-            .text()
-            .split('• ')
-            .filter((item) => !!item);
-          result.mainWork = mainWork;
+    const titleList = $('.JobDescription_JobDescription__VWfcb > h6');
+    const contentList = $(
+      '.JobDescription_JobDescription__VWfcb > h6+p > span'
+    );
+
+    const target = {};
+
+    titleList.each((idx, node) => {
+      const text = $(node).text();
+      switch (text) {
+        case MAINWORK:
+          target[idx] = 'mainwork';
           break;
-        }
-        case 2: {
-          const qualification = $(node)
-            .text()
-            .split('• ')
-            .filter((item) => !!item);
-          result.qualification = qualification;
+        case QUALIFICATION:
+          target[idx] = 'qualification';
           break;
-        }
-        case 3: {
-          const preferential = $(node)
-            .text()
-            .split('• ')
-            .filter((item) => !!item);
-          result.preferential = preferential;
+        case PREFERENTIAL:
+          target[idx] = 'preferential';
           break;
-        }
+        default:
       }
     });
+
+    contentList.each((idx, node) => {
+      if (idx in target) {
+        const html = $(node).html();
+        const isDot = !!html.match(DotRegex);
+        const base = isDot ? '• ' : '-';
+        const endPoint = html.search('<br><br>');
+        const data = html
+          .slice(0, endPoint)
+          .split(base)
+          .join('')
+          .split('<br>')
+          .filter((item) => !!item);
+        result[target[idx]] = data;
+      }
+    });
+
     await browser.close();
     return result;
   }

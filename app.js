@@ -72,14 +72,13 @@ app.get('/jobs', (req, res, next) => {
   res.status(200).json(data);
 });
 
-app.post('/jobs', async (req, res, next) => {
+app.post('/api/job', async (req, res, next) => {
   const url = req.body.url;
-  let job;
   try {
-    job = await crawler.creatJob(url);
-    jobs = [job, ...jobs];
+    const job = await crawler.creatJob(url);
     res.status(201).json(job);
   } catch (error) {
+    console.log(error);
     res.sendStatus(400);
   }
 });
